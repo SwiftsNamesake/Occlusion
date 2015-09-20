@@ -1,5 +1,5 @@
 -- |
--- Module      : Occlusion.Types
+-- Module      : Occlusion.Core
 -- Description :
 -- Copyright   : (c) Jonatan H Sundqvist, 2015
 -- License     : MIT
@@ -28,36 +28,17 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------------------------------------------------------------------
-module Occlusion.Types where
+module Occlusion.Core where
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- We'll need these
 --------------------------------------------------------------------------------------------------------------------------------------------
-import Data.Complex
-import qualified Data.Set as S
-import qualified Data.Map as M
 
-import Graphics.UI.Gtk
--- import Graphics.Rendering.Cairo
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
--- Types
+-- Functions
 --------------------------------------------------------------------------------------------------------------------------------------------
--- |
-data AppState = AppState { _gui :: GUI, _animation :: AnimationData, _input :: InputData }
-
-
--- |
-data GUI = GUI { _window :: Window,  _canvas :: DrawingArea }
-
-
--- |
-data InputData = InputData { _mouse :: Complex Double, _keyboard :: S.Set String }
-
-
--- |
-data AnimationData = AnimationData { _fps :: Double, _frame :: Int }

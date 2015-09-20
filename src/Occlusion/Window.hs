@@ -1,5 +1,5 @@
 -- |
--- Module      : Occlusion.Types
+-- Module      : Occlusion.Window
 -- Description :
 -- Copyright   : (c) Jonatan H Sundqvist, 2015
 -- License     : MIT
@@ -24,11 +24,10 @@
 
 
 
-
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------------------------------------------------------------------
-module Occlusion.Types where
+module Occlusion.Window where
 
 
 
@@ -36,28 +35,33 @@ module Occlusion.Types where
 -- We'll need these
 --------------------------------------------------------------------------------------------------------------------------------------------
 import Data.Complex
-import qualified Data.Set as S
-import qualified Data.Map as M
 
 import Graphics.UI.Gtk
--- import Graphics.Rendering.Cairo
+import qualified Graphics.Rendering.Cairo as Cairo
+
+import Occlusion.Types
+import qualified Occlusion.Core   as Core
+import qualified Occlusion.Events as Events
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
--- Types
+-- Functions
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- |
-data AppState = AppState { _gui :: GUI, _animation :: AnimationData, _input :: InputData }
+create :: Complex Double -> IO (Window, Canvas)
+create (winx:+winy) = do
+  initGUI
+  window <- windowNew
+  frame  <- frameNew
 
+  set window [windowTitle := "Occlusion"]
 
--- |
-data GUI = GUI { _window :: Window,  _canvas :: DrawingArea }
+  canvas <- drawingAreaNew
+  containerAdd frame canvas
+  set window [ containerChild := frame ]
+  windowSetDefaultSize window (round winx) (round winy)
+  -- windowSetIconFromFile window "assets/images/gclef.png"
 
-
--- |
-data InputData = InputData { _mouse :: Complex Double, _keyboard :: S.Set String }
-
-
--- |
-data AnimationData = AnimationData { _fps :: Double, _frame :: Int }
+  widgetAddEvents canvas [PointerMotionMask] -- MouseButton1Mask
+  widgetShowAll window
