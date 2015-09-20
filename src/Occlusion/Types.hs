@@ -67,3 +67,7 @@ data AnimationData = AnimationData { _fps :: Double, _frame :: Int }
 -- |
 type Polygon n = [Complex n]
 type Scene n   = [Polygon n]
+
+
+-- |
+-- data Character = Character {}
