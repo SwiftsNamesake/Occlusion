@@ -49,7 +49,7 @@ import qualified Occlusion.Events as Events
 -- Functions
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- |
-create :: Complex Double -> IO (Window, Canvas)
+create :: Complex Double -> IO (Window, DrawingArea)
 create (winx:+winy) = do
   initGUI
   window <- windowNew
@@ -65,3 +65,5 @@ create (winx:+winy) = do
 
   widgetAddEvents canvas [PointerMotionMask] -- MouseButton1Mask
   widgetShowAll window
+
+  return (window, canvas)

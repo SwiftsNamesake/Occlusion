@@ -42,6 +42,7 @@ import Graphics.UI.Gtk
 import qualified Graphics.Rendering.Cairo as Cairo
 
 import Occlusion.Types
+import Occlusion.Lenses
 
 
 
@@ -56,8 +57,8 @@ onrender appstate = return ()
 -- |
 onanimate :: IORef AppState -> IO Bool
 onanimate stateref = do
-  appstate <- readIORef canvas
-  widgetQueueDraw canvas
+  appstate <- readIORef stateref
+  widgetQueueDraw (appstate^.gui.canvas)
   modifyIORef stateref (animation.frame %~ (+1)) -- Increment frame count
   return True
 
@@ -109,6 +110,6 @@ attach window canvas stateref = do
   window `on` keyPressEvent      $ onkeypressed appstate
   window `on` keyReleaseEvent    $ onkeyreleased appstate
 
-  timeoutAdd (onanimate stateref) (1.0 / appstate->animation.fps)
+  timeoutAdd (onanimate stateref) (round $ 1.0 / appstate^.animation.fps)
 
   return ()

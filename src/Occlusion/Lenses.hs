@@ -88,3 +88,12 @@ fps f s = (\new -> s { _fps=new }) <$> f (_fps s)
 
 frame :: Lens AnimationData AnimationData Int Int
 frame f s = (\new -> s { _frame=new }) <$> f (_frame s)
+
+
+-- Complex --------------------------------------------------------------------------------------------------------------------------------
+real :: Lens (Complex n) (Complex n) n n
+real f (re:+im) = (:+im) <$> f re
+
+
+imag :: Lens (Complex n) (Complex n) n n
+imag f (re:+im) = (re:+) <$> f im
