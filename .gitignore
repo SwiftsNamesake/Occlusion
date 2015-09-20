@@ -1,0 +1,8 @@
+*.sublime-workspace
+*.exe
+*.hi
+*.o
+bin/
+dist/
+.cabal-sandbox/
+.stack-work/
