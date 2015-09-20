@@ -63,6 +63,10 @@ input :: Lens AppState AppState InputData InputData
 input f s = (\new -> s { _input=new }) <$> f (_input s)
 
 
+scene :: Lens AppState AppState Scene Scene
+scene f s = (\new -> s { _scene=new }) <$> f (_scene s)
+
+
 -- GUI -------------------------------------------------------------------------------------------------------------------------------------
 window :: Lens GUI GUI Window Window
 window f s = (\new -> s { _window=new }) <$> f (_window s)
@@ -88,6 +92,24 @@ fps f s = (\new -> s { _fps=new }) <$> f (_fps s)
 
 frame :: Lens AnimationData AnimationData Int Int
 frame f s = (\new -> s { _frame=new }) <$> f (_frame s)
+
+
+-- Scene -----------------------------------------------------------------------------------------------------------------------------------
+player :: Lens Scene Scene Character Character
+player f s = (\new -> s { _player=new }) <$> f (_player s)
+
+
+obstacles :: Lens Scene Scene [Polygon Double] [Polygon Double]
+obstacles f s = (\new -> s { _obstacles=new }) <$> f (_obstacles s)
+
+
+-- Character -------------------------------------------------------------------------------------------------------------------------------
+position :: Lens Character Character (Complex Double) (Complex Double)
+position f s = (\new -> s { _position=new }) <$> f (_position s)
+
+
+velocity :: Lens Character Character (Complex Double) (Complex Double)
+velocity f s = (\new -> s { _velocity=new }) <$> f (_velocity s)
 
 
 -- Complex --------------------------------------------------------------------------------------------------------------------------------

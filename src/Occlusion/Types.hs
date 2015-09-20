@@ -48,7 +48,7 @@ import Graphics.UI.Gtk
 -- Types
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- |
-data AppState = AppState { _gui :: GUI, _animation :: AnimationData, _input :: InputData }
+data AppState = AppState { _gui :: GUI, _animation :: AnimationData, _input :: InputData, _scene :: Scene }
 
 
 -- |
@@ -66,8 +66,12 @@ data AnimationData = AnimationData { _fps :: Double, _frame :: Int }
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- |
 type Polygon n = [Complex n]
-type Scene n   = [Polygon n]
+-- type Scene n   = [Polygon n]
 
 
 -- |
--- data Character = Character {}
+data Scene = Scene { _player :: Character, _obstacles :: [Polygon Double] }
+
+
+-- |
+data Character = Character { _position :: Complex Double, _velocity :: Complex Double }
