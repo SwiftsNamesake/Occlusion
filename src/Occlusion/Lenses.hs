@@ -21,7 +21,6 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- GHC Pragmas
 --------------------------------------------------------------------------------------------------------------------------------------------
--- {-# LANGUAGE TemplateHaskell #-}
 
 
 
@@ -51,6 +50,7 @@ import Occlusion.Types
 -- Lenses
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- AppState --------------------------------------------------------------------------------------------------------------------------------
+
 gui :: Lens AppState AppState GUI GUI
 gui f s = (\new -> s { _gui=new }) <$> f (_gui s)
 
@@ -66,8 +66,8 @@ input f s = (\new -> s { _input=new }) <$> f (_input s)
 scene :: Lens AppState AppState Scene Scene
 scene f s = (\new -> s { _scene=new }) <$> f (_scene s)
 
-
 -- GUI -------------------------------------------------------------------------------------------------------------------------------------
+
 window :: Lens GUI GUI Window Window
 window f s = (\new -> s { _window=new }) <$> f (_window s)
 
@@ -75,8 +75,8 @@ window f s = (\new -> s { _window=new }) <$> f (_window s)
 canvas :: Lens GUI GUI DrawingArea DrawingArea
 canvas f s = (\new -> s { _canvas=new }) <$> f (_canvas s)
 
-
 -- InputData -------------------------------------------------------------------------------------------------------------------------------
+
 mouse :: Lens InputData InputData (Complex Double) (Complex Double)
 mouse f s = (\new -> s { _mouse=new }) <$> f (_mouse s)
 
@@ -84,8 +84,8 @@ mouse f s = (\new -> s { _mouse=new }) <$> f (_mouse s)
 keyboard :: Lens InputData InputData (S.Set String) (S.Set String)
 keyboard f s = (\new -> s { _keyboard=new }) <$> f (_keyboard s)
 
-
 -- AnimationData ---------------------------------------------------------------------------------------------------------------------------
+
 fps :: Lens AnimationData AnimationData Double Double
 fps f s = (\new -> s { _fps=new }) <$> f (_fps s)
 
@@ -93,8 +93,8 @@ fps f s = (\new -> s { _fps=new }) <$> f (_fps s)
 frame :: Lens AnimationData AnimationData Int Int
 frame f s = (\new -> s { _frame=new }) <$> f (_frame s)
 
-
 -- Scene -----------------------------------------------------------------------------------------------------------------------------------
+
 player :: Lens Scene Scene Character Character
 player f s = (\new -> s { _player=new }) <$> f (_player s)
 
@@ -102,8 +102,8 @@ player f s = (\new -> s { _player=new }) <$> f (_player s)
 obstacles :: Lens Scene Scene [Polygon Double] [Polygon Double]
 obstacles f s = (\new -> s { _obstacles=new }) <$> f (_obstacles s)
 
-
 -- Character -------------------------------------------------------------------------------------------------------------------------------
+
 position :: Lens Character Character (Complex Double) (Complex Double)
 position f s = (\new -> s { _position=new }) <$> f (_position s)
 
@@ -111,8 +111,8 @@ position f s = (\new -> s { _position=new }) <$> f (_position s)
 velocity :: Lens Character Character (Complex Double) (Complex Double)
 velocity f s = (\new -> s { _velocity=new }) <$> f (_velocity s)
 
+-- Complex ---------------------------------------------------------------------------------------------------------------------------------
 
--- Complex --------------------------------------------------------------------------------------------------------------------------------
 real :: Lens (Complex n) (Complex n) n n
 real f (re:+im) = (:+im) <$> f re
 

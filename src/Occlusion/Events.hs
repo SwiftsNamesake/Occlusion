@@ -37,9 +37,11 @@ module Occlusion.Events where
 --------------------------------------------------------------------------------------------------------------------------------------------
 import Data.IORef
 import Data.Complex
-import Data.Text as T
 import Data.Functor
+import qualified Data.Text as T
+import qualified Data.Set  as S
 import Control.Lens
+import Control.Monad (when, unless)
 
 import Graphics.UI.Gtk
 import qualified Graphics.Rendering.Cairo as Cairo
@@ -93,24 +95,23 @@ onmousereleased stateref = return False
 onkeypressed :: IORef AppState -> EventM EKey Bool
 onkeypressed stateref = do
   key <- T.unpack <$> eventKeyName
-  return (key :: String)
   Cairo.liftIO $ do
-    modifyIORef stateref (scene.player.velocity .~ direction key)
-    pos <- (^.scene.player.position) <$> readIORef stateref
-    print pos
+    appstate <- readIORef stateref
+    unless (S.member key $ appstate^.input.keyboard) $ do
+      modifyIORef stateref (input.keyboard %~ S.insert key)
+      modifyIORef stateref (scene.player.velocity %~ (+ velocityFromKey 42 key))
   return False
-  where
-    speed = 92
-    direction k = case k of
-      "Left"  -> (-speed):+0
-      "Right" -> ( speed):+0
-      "Up"    ->       0 :+(-speed)
-      "Down"  ->       0 :+( speed)
 
 
 -- |
 onkeyreleased :: IORef AppState -> EventM EKey Bool
-onkeyreleased stateref = return False
+onkeyreleased stateref = do
+  key <- T.unpack <$> eventKeyName
+  Cairo.liftIO $ do
+    appstate <- readIORef stateref
+    modifyIORef stateref (scene.player.velocity %~ (subtract $ velocityFromKey 42 key))
+    modifyIORef stateref (input.keyboard %~ S.delete key)
+  return False
 
 
 -- |
@@ -140,3 +141,14 @@ attach window canvas stateref = do
   timeoutAdd (onanimate stateref) (round $ 1000.0 / appstate^.animation.fps)
 
   return ()
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+-- |
+velocityFromKey :: Double -> String -> Complex Double
+velocityFromKey speed key = case key of
+      "Left"  -> (-speed):+0
+      "Right" -> ( speed):+0
+      "Up"    ->       0 :+(-speed)
+      "Down"  ->       0 :+( speed)
+      _       ->       0:+0

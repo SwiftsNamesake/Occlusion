@@ -62,9 +62,9 @@ main = do
   Events.attach window canvas stateref
   mainGUI
   where
-    size = (720:+480)
+    size = (720:+480) * 1.2
 
 
 -- |
 theobstacles :: [Polygon Double]
-theobstacles = [[(522:+150) + let θ = n*2*π/5 in 78*(cos θ:+sin θ) | n <- [0..4]], [(120:+342) + let θ = n*2*π/8 in 105*(cos θ:+sin θ) | n <- [0..7]]]
+theobstacles = [[origin + let θ = α + n*2*π/ns in mkPolar mag θ | n <- [0..(ns-1)]] | (α, ns, mag, origin) <- [(0, 5, 78, 522:+150), (0, 8, 92, 192:+342)] ]

@@ -65,7 +65,8 @@ executable Occlusion
                        cairo,
                        lens,
                        containers,
-                       text
+                       text,
+                       template-haskell
 
   -- Directories containing source files.
   hs-source-dirs:      src

@@ -58,20 +58,60 @@ scene thescene = do
   Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
   Cairo.fill
 
-  character (thescene^.player)
   forM (thescene^.obstacles) $ \poly -> do
     let Just (fr, to) = Core.anglespan (thescene^.player.position) poly
     vectorise Cairo.moveTo (thescene^.player.position)
-    vectorise Cairo.lineTo fr
+    vectorise Cairo.lineTo $ snd fr
 
     vectorise Cairo.moveTo (thescene^.player.position)
-    vectorise Cairo.lineTo to
+    vectorise Cairo.lineTo $ snd to
 
     Cairo.setSourceRGBA 0.28 0.71 0.84 1.00
+    Cairo.setLineWidth 2
     Cairo.stroke
 
+  shadows thescene
+  character (thescene^.player)
   return ()
 
+
+-- |
+shadows :: Scene -> Cairo.Render ()
+shadows thescene = do
+  forM (thescene^.obstacles) $ \poly -> do
+    shadow (thescene^.player) poly
+  return ()
+
+
+-- |
+shadow :: Character -> Polygon Double -> Cairo.Render ()
+shadow char poly = do
+  let Just (fr, to) = Core.anglespan pos poly
+      pos@(px:+py)  = char^.position
+      [α, β] = map (snd . polar . subtract (px:+py) . snd) [fr, to]
+
+  Cairo.resetClip
+
+  -- Clip to shadow triangle
+  vectorise Cairo.moveTo pos
+  vectorise Cairo.lineTo $ pos + mkPolar 800 α
+  vectorise Cairo.lineTo $ pos + mkPolar 800 β
+  Cairo.clip
+
+  -- Another clip (overlapping) encompassing the polygon and the non-occluded portion of the ground
+  polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
+
+  Cairo.clip
+  Cairo.arc px py 800 0 (2*π)
+  Cairo.setFillRule Cairo.FillRuleEvenOdd
+
+  when True $ Cairo.withRadialPattern px py 1200 px py 0 $ \pattern -> do
+    Cairo.patternAddColorStopRGBA pattern 0.0 1.0 1.0 1.0 0.9
+    Cairo.patternAddColorStopRGBA pattern 1.0 0.0 0.0 0.0 0.9
+    Cairo.setSource pattern
+    Cairo.fill
+
+  Cairo.resetClip
 
 
 -- |
