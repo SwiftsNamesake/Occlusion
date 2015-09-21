@@ -59,19 +59,33 @@ import Occlusion.Lenses
 vectorise :: (a -> a -> b) -> Complex a -> b
 vectorise f (x:+y) = f x y
 
+-- Plumbing --------------------------------------------------------------------------------------------------------------------------------
+
+-- |
+dotwise :: (a -> a -> a) -> Complex a -> Complex a -> Complex a
+dotwise f (x:+y) (x':+y') = f x x':+f y y'
+
+
+-- |
+dotmap :: (a -> a) -> Complex a -> Complex a
+dotmap f (x:+y) = f x:+f y
+
 -- Linear functions ------------------------------------------------------------------------------------------------------------------------
 
 -- |
 -- TODO: Refactor
 -- TODO: Invariants, check corner cases
 -- TODO: Deal with vertical lines
--- TODO: Factour out infinite-line logic
+-- TODO: Factor out infinite-line logic
+-- TODO: Decide how to deal with identical lines
+-- TODO: Factor out domain logic (eg. write restrict or domain function)
+-- TODO: Visual debugging functions
 intersect :: RealFloat f => Line f -> Line f -> Maybe (Complex f)
 -- intersect f@(Line a b) g@(Line a' b')
 intersect f g
   | slope f == slope g = Nothing -- TODO: Handle this case explicitly (eg. with linear) (?)
   -- | -- TODO: Deal with slope == Infinity
-  | otherwise = error ""
+  | otherwise = (,) <$> linear f <*> linear g >>= uncurry linearIntersect -- TODO: Refactor (?)
 
 
 -- | Gives the linear function overlapping the given segment
@@ -106,3 +120,17 @@ intercept (Line a b) = error ""
 -- |
 between :: Ord a => a -> a -> a -> Bool
 between mini maxi a = mini <= a && a <= maxi
+
+
+-- | Ensures that a given point lies within the domain and codomain
+-- TODO: Let thus function work on scalars, write another function for domain and codomain (?)
+-- restrict domain codomain p = _
+restrict :: Ord f => Complex f -> Complex f -> Complex f -> Maybe (Complex f)
+restrict a b p@(x:+y)
+  | indomain && incodomain = Just p
+  | otherwise              = Nothing
+  where
+    (lowx:+lowy)   = dotwise min a b
+    (highx:+highy) = dotwise max a b
+    indomain       = between lowx highx x
+    incodomain     = between lowy highy y
