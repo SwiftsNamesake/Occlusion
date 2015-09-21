@@ -60,7 +60,7 @@ angle :: RealFloat f => Complex f -> Complex f -> f
 angle a = snd . polar . subtract a
 
 
--- | Finds the mininum and maximum value in a list, by some arbitrary criterion.
+-- | Finds the minimum and maximum value in a list, by some arbitrary criterion.
 -- TODO: Strictness, performance, move to library
 minmaxBy :: (a -> a -> Ordering) -> [a] -> Maybe ((Int, a), (Int, a))
 minmaxBy _ []     = Nothing
@@ -79,6 +79,23 @@ anglespan p shape = minmaxBy (comparing $ normalise . angle p) shape
 
 
 -- |
--- TODO: Rename (eg. occlusionEdge, frontEdge, cover, etc.) (?)
+-- TODO: Rename (eg. occlusionEdge, frontEdge, near/far, cover, etc.) (?)
 nearestEdge :: RealFloat f => Complex f -> Polygon f -> Edge f
 nearestEdge p poly = error ""
+
+
+-- |
+-- TODO: Rename (eg. distant, etc.) (?)
+-- TODO: Rigorous algorithm
+distantEdge :: RealFloat f => Complex f -> Polygon f -> Maybe (Edge f)
+distantEdge p shape = case span' of
+  Just ((ai, α), (bi, β)) -> Just $ slice (min ai bi) (max ai bi) shape -- TODO: This line needs some love and attention
+  Nothing                 -> Nothing
+  where
+    span' = anglespan p shape
+
+
+-- |
+-- TODO: Cyclic slice
+slice :: Int -> Int -> [a] -> [a]
+slice fr to = take (to-fr) . drop fr

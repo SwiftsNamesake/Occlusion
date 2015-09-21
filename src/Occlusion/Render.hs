@@ -126,7 +126,10 @@ shadow char poly = do
 
   -- Another clip (overlapping) encompassing the polygon and the non-occluded portion of the ground
   -- polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
-  -- Cairo.clip
+  let (e:dge) = Core.distantEdge pos $ polygon in Cairo.moveTo e >> forM dge (vectorise Cairo.lineTo)
+  vectorise Cairo.lineTo $ pos + mkPolar 800 β
+
+  Cairo.clip
   Cairo.moveTo px py
   -- arc 1200 (min α β) (max α β) pos
   arcDebug 1200 (min α β) (max α β) pos
