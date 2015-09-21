@@ -54,7 +54,7 @@ executable Occlusion
   main-is:             Main.hs
 
   -- Modules included in this executable, other than Main.
-  other-modules:       Occlusion.Events, Occlusion.Types, Occlusion.Window, Occlusion.Lenses, Occlusion.Core
+  other-modules:       Occlusion.Events, Occlusion.Types, Occlusion.Window, Occlusion.Lenses, Occlusion.Core, Occlusion.Render, Occlusion.Vector
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
@@ -64,7 +64,8 @@ executable Occlusion
                        gtk3,
                        cairo,
                        lens,
-                       containers
+                       containers,
+                       text
 
   -- Directories containing source files.
   hs-source-dirs:      src
