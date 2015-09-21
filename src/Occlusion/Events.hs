@@ -99,7 +99,7 @@ onkeypressed stateref = do
     appstate <- readIORef stateref
     unless (S.member key $ appstate^.input.keyboard) $ do
       modifyIORef stateref (input.keyboard %~ S.insert key)
-      modifyIORef stateref (scene.player.velocity %~ (+ velocityFromKey 42 key))
+      modifyIORef stateref (scene.player.velocity %~ (+ velocityFromKey 64 key))
   return False
 
 
@@ -109,7 +109,7 @@ onkeyreleased stateref = do
   key <- T.unpack <$> eventKeyName
   Cairo.liftIO $ do
     appstate <- readIORef stateref
-    modifyIORef stateref (scene.player.velocity %~ (subtract $ velocityFromKey 42 key))
+    modifyIORef stateref (scene.player.velocity %~ (subtract $ velocityFromKey 64 key))
     modifyIORef stateref (input.keyboard %~ S.delete key)
   return False
 

@@ -54,23 +54,31 @@ import qualified Occlusion.Core as Core
 -- |
 scene :: Scene -> Cairo.Render ()
 scene thescene = do
-  forM (thescene^.obstacles) polygon
-  Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
-  Cairo.fill
+  -- Render obstacles
+  forM (thescene^.obstacles) $ \poly -> do
+    polygon poly
+    Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
+    Cairo.fill
 
+  -- Render span lines
   forM (thescene^.obstacles) $ \poly -> do
     let Just (fr, to) = Core.anglespan (thescene^.player.position) poly
-    vectorise Cairo.moveTo (thescene^.player.position)
-    vectorise Cairo.lineTo $ snd fr
-
-    vectorise Cairo.moveTo (thescene^.player.position)
-    vectorise Cairo.lineTo $ snd to
 
     Cairo.setSourceRGBA 0.28 0.71 0.84 1.00
     Cairo.setLineWidth 2
+
+    vectorise Cairo.moveTo (thescene^.player.position)
+    vectorise Cairo.lineTo $ snd fr
     Cairo.stroke
 
+    vectorise Cairo.moveTo (thescene^.player.position)
+    vectorise Cairo.lineTo $ snd to
+    Cairo.stroke
+
+  -- Render shadows
   shadows thescene
+
+  -- Render player
   character (thescene^.player)
   return ()
 
@@ -90,28 +98,42 @@ shadow char poly = do
       pos@(px:+py)  = char^.position
       [α, β] = map (snd . polar . subtract (px:+py) . snd) [fr, to]
 
-  Cairo.resetClip
+  -- Cairo.resetClip
+  -- Cairo.setFillRule Cairo.FillRuleEvenOdd
 
   -- Clip to shadow triangle
-  vectorise Cairo.moveTo pos
-  vectorise Cairo.lineTo $ pos + mkPolar 800 α
-  vectorise Cairo.lineTo $ pos + mkPolar 800 β
-  Cairo.clip
+  -- vectorise Cairo.moveTo pos
+  -- vectorise Cairo.lineTo $ pos + mkPolar 800 α
+  -- vectorise Cairo.lineTo $ pos + mkPolar 800 β
+  -- Cairo.clip
+  -- Cairo.resetClip
 
   -- Another clip (overlapping) encompassing the polygon and the non-occluded portion of the ground
-  polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
+  -- polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
+  -- Cairo.clip
+  Cairo.moveTo px py
+  arc 1200 (min α β) (max α β) pos
+  Cairo.setSourceRGBA 0.31 0.31 0.31 0.47
+  Cairo.fill
+  -- Cairo.clip
 
-  Cairo.clip
-  Cairo.arc px py 800 0 (2*π)
-  Cairo.setFillRule Cairo.FillRuleEvenOdd
-
-  when True $ Cairo.withRadialPattern px py 1200 px py 0 $ \pattern -> do
+  when False $ Cairo.withRadialPattern px py 1200 px py 0 $ \pattern -> do
     Cairo.patternAddColorStopRGBA pattern 0.0 1.0 1.0 1.0 0.9
     Cairo.patternAddColorStopRGBA pattern 1.0 0.0 0.0 0.0 0.9
     Cairo.setSource pattern
     Cairo.fill
 
-  Cairo.resetClip
+  -- Cairo.resetClip
+
+
+-- |
+arc :: Double -> Double -> Double -> Complex Double -> Cairo.Render ()
+arc r α β (cx:+cy) = Cairo.arc cx cy r α β
+
+
+-- |
+circle :: Double -> Complex Double -> Cairo.Render ()
+circle r centre = arc r 0 π centre
 
 
 -- |
