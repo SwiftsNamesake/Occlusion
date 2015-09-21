@@ -55,10 +55,10 @@ import qualified Occlusion.Events as Events
 main :: IO ()
 main = do
   (window, canvas) <- Window.create size
-  stateref         <- newIORef $ AppState { _gui       = GUI { _window=window, _canvas=canvas },
-                                            _animation = AnimationData { _fps=30.0, _frame=0 },
-                                            _input     = InputData { _keyboard=S.empty, _mouse=0:+0 },
-                                            _scene     = Scene { _player=Character { _position=0:+0, _velocity=0:+0 }, _obstacles=theobstacles } }
+  stateref         <- newIORef $ AppState { _animation = AnimationData { _fps=30.0, _frame=0 },
+                                            _input     = InputData { _keyboard=S.empty, _mouse=0:+0, _click=Nothing },
+                                            _scene     = Scene { _player=Character { _position=0:+0, _velocity=0:+0 }, _obstacles=theobstacles },
+                                            _gui       = GUI { _window=window, _canvas=canvas } }
   Events.attach window canvas stateref
   mainGUI
   where

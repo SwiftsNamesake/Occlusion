@@ -56,7 +56,7 @@ data GUI = GUI { _window :: Window,  _canvas :: DrawingArea }
 
 
 -- |
-data InputData = InputData { _mouse :: Complex Double, _keyboard :: S.Set String }
+data InputData = InputData { _mouse :: Complex Double, _click :: Maybe (Complex Double), _keyboard :: S.Set String }
 
 
 -- |
@@ -66,6 +66,7 @@ data AnimationData = AnimationData { _fps :: Double, _frame :: Int }
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- |
 type Polygon n = [Complex n]
+type Edge n    = [Complex n]
 -- type Scene n   = [Polygon n]
 
 

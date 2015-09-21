@@ -38,6 +38,7 @@ import Data.Complex
 import Data.IORef
 import Control.Monad (forM, forM_, mapM, mapM_, when, unless)
 import Control.Lens
+import Text.Printf
 
 import qualified Graphics.Rendering.Cairo as Cairo
 
@@ -56,9 +57,10 @@ scene :: Scene -> Cairo.Render ()
 scene thescene = do
   -- Render obstacles
   forM (thescene^.obstacles) $ \poly -> do
-    polygon poly
-    Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
-    Cairo.fill
+    -- polygon poly
+    -- Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
+    -- Cairo.fill
+    polygonDebug (thescene^.player.position) poly
 
   -- Render span lines
   forM (thescene^.obstacles) $ \poly -> do
@@ -78,15 +80,29 @@ scene thescene = do
   -- Render shadows
   shadows thescene
 
+  -- Render vertex markers
+  forM (thescene^.obstacles) cornerMarkers
+
+
   -- Render player
   character (thescene^.player)
   return ()
 
 
 -- |
+cornerMarkers :: Polygon Double -> Cairo.Render ()
+cornerMarkers poly = do
+  Cairo.setSourceRGBA 0.84 0.06 0.18 1.00
+  Cairo.setFontSize 14
+  forM (zip [0..] poly) $ \(i, p) -> do
+    vectorise Cairo.moveTo p
+    Cairo.showText $ show i
+  return ()
+
+-- |
 shadows :: Scene -> Cairo.Render ()
 shadows thescene = do
-  forM (thescene^.obstacles) $ \poly -> do
+  forM (take 1 $ thescene^.obstacles) $ \poly -> do
     shadow (thescene^.player) poly
   return ()
 
@@ -112,19 +128,45 @@ shadow char poly = do
   -- polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
   -- Cairo.clip
   Cairo.moveTo px py
-  arc 1200 (min α β) (max α β) pos
+  -- arc 1200 (min α β) (max α β) pos
+  arcDebug 1200 (min α β) (max α β) pos
   Cairo.setSourceRGBA 0.31 0.31 0.31 0.47
-  Cairo.fill
+  -- Cairo.fill
   -- Cairo.clip
 
-  when False $ Cairo.withRadialPattern px py 1200 px py 0 $ \pattern -> do
-    Cairo.patternAddColorStopRGBA pattern 0.0 1.0 1.0 1.0 0.9
+  when True $ Cairo.withRadialPattern px py 1200 px py 0 $ \pattern -> do
     Cairo.patternAddColorStopRGBA pattern 1.0 0.0 0.0 0.0 0.9
+    Cairo.patternAddColorStopRGBA pattern 0.0 1.0 1.0 1.0 0.9
     Cairo.setSource pattern
     Cairo.fill
 
   -- Cairo.resetClip
 
+
+-- |
+arcDebug :: Double -> Double -> Double -> Complex Double -> Cairo.Render ()
+arcDebug r α β centre = do
+  arc r α β centre
+  Cairo.setSourceRGBA 0.12 0.53 0.5 0.53
+  Cairo.fill
+
+  Cairo.setLineWidth 8
+  arc r α β centre
+  Cairo.stroke
+
+  Cairo.setLineWidth 3
+  arc (r*0.06) α β centre
+  Cairo.stroke
+
+  Cairo.setLineWidth 4
+  arc (r*0.12) 0.0 α centre
+  Cairo.setSourceRGBA 0.7 0.02 0.78 0.74
+  Cairo.stroke
+
+  Cairo.setLineWidth 4
+  arc (r*0.18) 0.0 β centre
+  Cairo.setSourceRGBA 0.08 0.42 0.15 0.51
+  Cairo.stroke
 
 -- |
 arc :: Double -> Double -> Double -> Complex Double -> Cairo.Render ()
@@ -139,6 +181,21 @@ circle r centre = arc r 0 π centre
 -- |
 polygon :: Polygon Double -> Cairo.Render ()
 polygon (p:oints) = vectorise Cairo.moveTo p >> mapM (vectorise Cairo.lineTo) oints >> Cairo.closePath
+
+
+-- |
+polygonDebug :: Complex Double -> Polygon Double -> Cairo.Render ()
+polygonDebug pos poly = do
+  Cairo.setSourceRGBA 0.84 0.06 0.18 1.00
+  Cairo.setFontSize 14
+  polygon poly >> Cairo.setSourceRGBA 0.38 0.84 0.09 0.67 >> Cairo.fill
+  forM (zip [(0 :: Int)..] poly) $ \(i, p) -> do
+    vectorise Cairo.moveTo p
+    Cairo.showText $ (printf "%d (%.02f°)" i (todeg $ Core.angle pos p :: Double) :: String)
+  return ()
+  where
+    todeg rad = rad * (180.0/π)
+    torad deg = deg / (180.0/π)
 
 
 -- |
