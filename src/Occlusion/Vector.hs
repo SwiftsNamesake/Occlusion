@@ -85,7 +85,7 @@ intersect :: RealFloat f => Line f -> Line f -> Maybe (Complex f)
 intersect f g
   | slope f == slope g = Nothing -- TODO: Handle this case explicitly (eg. with linear) (?)
   -- | -- TODO: Deal with slope == Infinity
-  | otherwise = (,) <$> linear f <*> linear g >>= uncurry linearIntersect -- TODO: Refactor (?)
+  | otherwise = (,) <$> linear f <*> linear g >>= {- restric goes here -} uncurry linearIntersect -- TODO: Refactor (?)
 
 
 -- | Gives the linear function overlapping the given segment
