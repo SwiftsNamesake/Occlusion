@@ -10,7 +10,7 @@
 
 -- Created September 20 2015
 
--- TODO | -
+-- TODO | - Angles utilities, units, normalise angles
 --        -
 
 -- SPEC | -
@@ -21,7 +21,7 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- GHC Pragmas
 --------------------------------------------------------------------------------------------------------------------------------------------
-
+-- {-# LANGUAGE ScopedTypeVariables #-}
 
 
 
@@ -37,10 +37,13 @@ module Occlusion.Core where
 --------------------------------------------------------------------------------------------------------------------------------------------
 import Data.Complex
 import Data.Function
+import Data.Fixed
 import Data.List (minimumBy, maximumBy)
 import Data.Ord  (comparing)
+
 import Occlusion.Types
 import Occlusion.Lenses
+import Occlusion.Vector
 
 
 
@@ -70,7 +73,9 @@ minmaxBy f (x:xs) = Just . foldr (\n (mini, maxi) -> (minBy f n mini, maxBy f n 
 -- |
 -- TODO: Rename (?)
 anglespan :: RealFloat f => Complex f -> Polygon f -> Maybe ((Int, Complex f), (Int, Complex f))
-anglespan p shape = minmaxBy (comparing $ angle p) shape
+anglespan p shape = minmaxBy (comparing $ normalise . angle p) shape
+  where
+    normalise = flip mod' $ 2*π
 
 
 -- |
