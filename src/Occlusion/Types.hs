@@ -67,6 +67,8 @@ data AnimationData = AnimationData { _fps :: Double, _frame :: Int }
 -- |
 type Polygon n = [Complex n]
 type Edge n    = [Complex n]
+type Linear n  = (n, n) -- TODO: Use custom type (eg. Linear { slope :: n, intercept :: n })
+data Line n    = Line (Complex n) (Complex n)
 -- type Scene n   = [Polygon n]
 
 

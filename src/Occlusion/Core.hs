@@ -74,8 +74,11 @@ minmaxBy f (x:xs) = Just . foldr (\n (mini, maxi) -> (minBy f n mini, maxBy f n 
 -- TODO: Rename (?)
 anglespan :: RealFloat f => Complex f -> Polygon f -> Maybe ((Int, Complex f), (Int, Complex f))
 anglespan p shape = minmaxBy (comparing $ normalise . angle p) shape
-  where
-    normalise = flip mod' $ 2*π
+
+
+-- |
+normalise :: RealFloat f => f -> f
+normalise = flip mod' $ 2*π
 
 
 -- |
@@ -87,12 +90,21 @@ nearestEdge p poly = error ""
 -- |
 -- TODO: Rename (eg. distant, etc.) (?)
 -- TODO: Rigorous algorithm
-distantEdge :: RealFloat f => Complex f -> Polygon f -> Maybe (Edge f)
+-- TODO: I could solve this with intersect testing...
+-- TODO: Or comparing (ai < bi) to (α < β)
+distantEdge :: (RealFloat f, Ord f) => Complex f -> Polygon f -> Maybe (Edge f)
 distantEdge p shape = case span' of
-  Just ((ai, α), (bi, β)) -> Just $ slice (min ai bi) (max ai bi) shape -- TODO: This line needs some love and attention
+  -- Just ((ai, α), (bi, β)) -> Just $ slice (min ai bi) (max ai bi) shape -- TODO: This line needs some love and attention
+  -- Just ((ai, α), (bi, β)) -> Just $ slice (max ai bi) (max ai bi+length shape - min ai bi) $ cycle shape -- TODO: This line needs some love and attention
+  Just ((ai, fr), (bi, to)) -> Just $ if (ai < bi) == (normalise (angle p fr) < normalise (angle p to))
+                                      then slice (max ai bi) (min ai bi + length shape) (cycle shape)
+                                      else slice (min ai bi) (max ai bi) (shape)
   Nothing                 -> Nothing
   where
     span' = anglespan p shape
+    -- gap   =
+    -- from = _
+    -- to   = _
 
 
 -- |
