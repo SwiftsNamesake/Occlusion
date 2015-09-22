@@ -64,7 +64,7 @@ angle a = snd . polar . subtract a
 -- TODO: Strictness, performance, move to library
 minmaxBy :: (a -> a -> Ordering) -> [a] -> Maybe ((Int, a), (Int, a))
 minmaxBy _ []     = Nothing
-minmaxBy f (x:xs) = Just . foldr (\n (mini, maxi) -> (minBy f n mini, maxBy f n maxi)) ((0, x), (0, x)) $ zip [0..] xs
+minmaxBy f (x:xs) = Just . foldr (\n (mini, maxi) -> (minBy f n mini, maxBy f n maxi)) ((0, x), (0, x)) $ zip [1..] xs
   where
     minBy f n mini = maximumBy (f `on` snd) [n, mini]
     maxBy f n maxi = minimumBy (f `on` snd) [n, maxi]
@@ -72,6 +72,7 @@ minmaxBy f (x:xs) = Just . foldr (\n (mini, maxi) -> (minBy f n mini, maxBy f n 
 
 -- |
 -- TODO: Rename (?)
+-- TODO: Maybe it would be a good idea if a function called 'anglespan' actually returned some angles.
 anglespan :: RealFloat f => Complex f -> Polygon f -> Maybe ((Int, Complex f), (Int, Complex f))
 anglespan p shape = minmaxBy (comparing $ normalise . angle p) shape
 
@@ -96,9 +97,10 @@ distantEdge :: (RealFloat f, Ord f) => Complex f -> Polygon f -> Maybe (Edge f)
 distantEdge p shape = case span' of
   -- Just ((ai, α), (bi, β)) -> Just $ slice (min ai bi) (max ai bi) shape -- TODO: This line needs some love and attention
   -- Just ((ai, α), (bi, β)) -> Just $ slice (max ai bi) (max ai bi+length shape - min ai bi) $ cycle shape -- TODO: This line needs some love and attention
-  Just ((ai, fr), (bi, to)) -> Just $ if (ai < bi) == (normalise (angle p fr) < normalise (angle p to))
-                                      then slice (max ai bi) (min ai bi + length shape) (cycle shape)
-                                      else slice (min ai bi) (max ai bi) (shape)
+  Just ((ai, a), (bi, b)) -> Just $ slice (max ai bi) (length shape + max ai bi - 1) $ cycle shape
+  -- Just ((ai, fr), (bi, to)) -> Just $ if (ai < bi) == (normalise (angle p fr) < normalise (angle p to))
+  --                                       then slice (max ai bi) (min ai bi + length shape) (cycle shape)
+  --                                       else slice (min ai bi) (max ai bi) (shape)
   Nothing                 -> Nothing
   where
     span' = anglespan p shape

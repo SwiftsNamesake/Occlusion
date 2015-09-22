@@ -37,6 +37,7 @@ module Occlusion.Render where
 import Data.Complex
 import Data.IORef
 import Data.Functor
+import Data.Function
 import Control.Monad (forM, forM_, mapM, mapM_, when, unless, void)
 import Control.Lens
 import Text.Printf
@@ -64,19 +65,19 @@ scene thescene = do
     -- polygonDebug (thescene^.player.position) poly
 
   -- Render span lines
-  forM (thescene^.obstacles) $ \poly -> do
-    let Just (fr, to) = Core.anglespan (thescene^.player.position) poly
-
-    Cairo.setSourceRGBA 0.28 0.71 0.84 1.00
-    Cairo.setLineWidth 2
-
-    vectorise Cairo.moveTo (thescene^.player.position)
-    vectorise Cairo.lineTo $ snd fr
-    Cairo.stroke
-
-    vectorise Cairo.moveTo (thescene^.player.position)
-    vectorise Cairo.lineTo $ snd to
-    Cairo.stroke
+  -- forM (thescene^.obstacles) $ \poly -> do
+  --   -- let Just (fr, to) = Core.anglespan (thescene^.player.position) poly
+  --   --
+  --   -- Cairo.setSourceRGBA 0.28 0.71 0.84 1.00
+  --   -- Cairo.setLineWidth 2
+  --   --
+  --   -- vectorise Cairo.moveTo (thescene^.player.position)
+  --   -- vectorise Cairo.lineTo $ snd fr
+  --   -- Cairo.stroke
+  --   --
+  --   -- vectorise Cairo.moveTo (thescene^.player.position)
+  --   -- vectorise Cairo.lineTo $ snd to
+  --   -- Cairo.stroke
 
   -- Render shadows
   shadows thescene
@@ -127,15 +128,18 @@ shadow char poly = do
 
   -- Another clip (overlapping) encompassing the polygon and the non-occluded portion of the ground
   -- polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
-  -- maybe (return ()) line (Core.distantEdge pos poly)
-  vectorise Cairo.moveTo $ pos
-  -- vectorise Cairo.lineTo $ pos + mkPolar 400 α
-  arc 1200 (min α β) (max α β) pos
-  Cairo.closePath
-  -- vectorise Cairo.lineTo $ pos + mkPolar 1200 α
+  maybe pass line (Core.distantEdge pos poly)
+  -- Cairo.liftIO $ print $ (uncurry ((,) `on` fst)) <$> Core.anglespan pos poly
   -- Cairo.setSourceRGBA 0.91 0.02 0.40 1.00
   -- Cairo.setLineWidth 8
   -- Cairo.stroke
+
+  -- vectorise Cairo.moveTo $ pos
+  vectorise Cairo.lineTo $ pos + mkPolar 1200 α
+  arc 1200 (min α β) (max α β) pos
+  vectorise Cairo.lineTo $ pos + mkPolar 1200 β
+  -- Cairo.closePath
+  -- vectorise Cairo.lineTo $ pos + mkPolar 1200 α
   -- arc 1200 (min α β) (max α β) pos
   -- arcDebug 1200 (min α β) (max α β) pos
   -- Cairo.setSourceRGBA 0.31 0.31 0.31 0.47
@@ -219,12 +223,12 @@ character char = do
   Cairo.setSourceRGBA 0.47 0.04 0.37 1.00
   Cairo.fill
 
-  line [char^.position, char^.position + (400:+0)]
+  line [char^.position, char^.position + (800:+0)]
   Cairo.setSourceRGBA 1.00 0.00 0.00 1.00
   Cairo.setLineWidth  2.0
   Cairo.stroke
 
-  line [char^.position, char^.position + (0:+400)]
+  line [char^.position, char^.position + (0:+800)]
   Cairo.setSourceRGBA 0.00 0.00 1.00 1.00
   Cairo.setLineWidth  2.0
   Cairo.stroke
