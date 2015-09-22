@@ -154,13 +154,13 @@ attach :: Window -> DrawingArea -> IORef AppState -> IO ()
 attach window canvas stateref = do
   appstate <- readIORef stateref
 
-  canvas `on` draw               $ Cairo.liftIO (readIORef stateref) >>= onrender
+  canvas `on` draw $ Cairo.liftIO (readIORef stateref) >>= onrender
 
-  canvas `on` motionNotifyEvent  $ onmousemoves stateref
-  canvas `on` buttonPressEvent   $ onmousepressed stateref
+  canvas `on` motionNotifyEvent  $ onmousemoves    stateref
+  canvas `on` buttonPressEvent   $ onmousepressed  stateref
   canvas `on` buttonReleaseEvent $ onmousereleased stateref
-  window `on` keyPressEvent      $ onkeypressed stateref
-  window `on` keyReleaseEvent    $ onkeyreleased stateref
+  window `on` keyPressEvent      $ onkeypressed    stateref
+  window `on` keyReleaseEvent    $ onkeyreleased   stateref
 
   window `on` deleteEvent $ Cairo.liftIO mainQuit >> return False
 
