@@ -73,6 +73,7 @@ minmaxBy f (x:xs) = Just . foldr (\n (mini, maxi) -> (minBy f n mini, maxBy f n 
 -- |
 -- TODO: Rename (?)
 -- TODO: Maybe it would be a good idea if a function called 'anglespan' actually returned some angles.
+-- TODO: Think radar
 anglespan :: RealFloat f => Complex f -> Polygon f -> Maybe ((Int, Complex f), (Int, Complex f))
 anglespan p shape = minmaxBy (comparing $ normalise . angle p) shape
 
