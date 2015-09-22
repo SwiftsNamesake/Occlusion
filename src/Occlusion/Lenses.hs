@@ -81,6 +81,10 @@ mouse :: Lens InputData InputData (Complex Double) (Complex Double)
 mouse f s = (\new -> s { _mouse=new }) <$> f (_mouse s)
 
 
+click :: Lens InputData InputData (Maybe (Complex Double)) (Maybe (Complex Double))
+click f s = (\new -> s { _click=new }) <$> f (_click s)
+
+
 keyboard :: Lens InputData InputData (S.Set String) (S.Set String)
 keyboard f s = (\new -> s { _keyboard=new }) <$> f (_keyboard s)
 

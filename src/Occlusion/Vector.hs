@@ -134,3 +134,20 @@ restrict a b p@(x:+y)
     (highx:+highy) = dotwise max a b
     indomain       = between lowx highx x
     incodomain     = between lowy highy y
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+-- |
+pass :: Monad m => m ()
+pass = return ()
+
+
+-- |
+unit :: Monad m => a -> m a
+unit = return
+
+
+-- | Like maybe, except the function comes at the end
+perhaps :: b -> Maybe a -> (a -> b) -> b
+perhaps d m f = maybe d f m

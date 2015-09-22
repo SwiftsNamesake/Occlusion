@@ -38,16 +38,18 @@ module Occlusion.Events where
 import Data.IORef
 import Data.Complex
 import Data.Functor
+import Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Set  as S
 import Control.Lens
-import Control.Monad (when, unless)
+import Control.Monad (when, unless, forM, mapM)
 
 import Graphics.UI.Gtk
 import qualified Graphics.Rendering.Cairo as Cairo
 
 import Occlusion.Types
 import Occlusion.Lenses
+import Occlusion.Vector
 import qualified Occlusion.Render as Render
 
 
@@ -64,31 +66,57 @@ onrender appstate = do
 -- |
 onanimate :: IORef AppState -> IO Bool
 onanimate stateref = do
+  --
+  modifyIORef stateref (\appstate -> appstate & scene.player.velocity .~ currentVelocity appstate) -- TODO: This is ugly
   appstate <- readIORef stateref
+
+  --
   widgetQueueDraw (appstate^.gui.canvas)
   modifyIORef stateref (animation.frame %~ (+1)) -- Increment frame count
 
+  --
   let dt = (1.0/appstate^.animation.fps):+0
       v  = appstate^.scene.player.velocity
   modifyIORef stateref (scene.player.position %~ (+(dt*v)))
   return True
-  -- where
-    -- dt = 1.0/appstate^.animation.fps
+
+
+-- |
+-- TODO: Move
+currentVelocity :: AppState -> Complex Double
+currentVelocity appstate
+  | appstate^.input.click == Nothing = 0:+0
+  | abs delta^.real < 12             = 0
+  | otherwise                        = mkPolar 64 (phase delta)
+  where
+    delta = appstate^.input.mouse - appstate^.scene.player.position
 
 
 -- |
 onmousemoves :: IORef AppState -> EventM EMotion Bool
-onmousemoves stateref = return False
+onmousemoves stateref = do
+  p <- uncurry (:+) <$> eventCoordinates
+  Cairo.liftIO $ do
+    modifyIORef stateref (input.mouse .~ p)
+  return False
 
 
 -- |
 onmousepressed :: IORef AppState -> EventM EButton Bool
-onmousepressed stateref = return False
+onmousepressed stateref = do
+  p <- uncurry (:+) <$> eventCoordinates
+  Cairo.liftIO $ do
+    modifyIORef stateref (input.click .~ Just p)
+  return False
 
 
 -- |
 onmousereleased :: IORef AppState -> EventM EButton Bool
-onmousereleased stateref = return False
+onmousereleased stateref = do
+  p <- uncurry (:+) <$> eventCoordinates
+  Cairo.liftIO $ do
+    modifyIORef stateref (input.click .~ Nothing)
+  return False
 
 
 -- |
@@ -99,7 +127,6 @@ onkeypressed stateref = do
     appstate <- readIORef stateref
     unless (S.member key $ appstate^.input.keyboard) $ do
       modifyIORef stateref (input.keyboard %~ S.insert key)
-      modifyIORef stateref (scene.player.velocity %~ (+ velocityFromKey 64 key))
   return False
 
 
@@ -109,7 +136,6 @@ onkeyreleased stateref = do
   key <- T.unpack <$> eventKeyName
   Cairo.liftIO $ do
     appstate <- readIORef stateref
-    modifyIORef stateref (scene.player.velocity %~ (subtract $ velocityFromKey 64 key))
     modifyIORef stateref (input.keyboard %~ S.delete key)
   return False
 
@@ -130,9 +156,9 @@ attach window canvas stateref = do
 
   canvas `on` draw               $ Cairo.liftIO (readIORef stateref) >>= onrender
 
-  window `on` motionNotifyEvent  $ onmousemoves stateref
-  window `on` buttonPressEvent   $ onmousepressed stateref
-  window `on` buttonReleaseEvent $ onmousereleased stateref
+  canvas `on` motionNotifyEvent  $ onmousemoves stateref
+  canvas `on` buttonPressEvent   $ onmousepressed stateref
+  canvas `on` buttonReleaseEvent $ onmousereleased stateref
   window `on` keyPressEvent      $ onkeypressed stateref
   window `on` keyReleaseEvent    $ onkeyreleased stateref
 
@@ -140,7 +166,7 @@ attach window canvas stateref = do
 
   timeoutAdd (onanimate stateref) (round $ 1000.0 / appstate^.animation.fps)
 
-  return ()
+  pass
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------

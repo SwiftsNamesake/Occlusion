@@ -63,7 +63,7 @@ create (winx:+winy) = do
   windowSetDefaultSize window (round winx) (round winy)
   -- windowSetIconFromFile window "assets/images/gclef.png"
 
-  widgetAddEvents canvas [PointerMotionMask] -- MouseButton1Mask
+  widgetAddEvents canvas [PointerMotionMask, ButtonMotionMask, ButtonPressMask] -- MouseButton1Mask
   widgetShowAll window
 
   return (window, canvas)
