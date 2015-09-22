@@ -58,10 +58,10 @@ scene :: Scene -> Cairo.Render ()
 scene thescene = do
   -- Render obstacles
   forM (thescene^.obstacles) $ \poly -> do
-    -- polygon poly
-    -- Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
-    -- Cairo.fill
-    polygonDebug (thescene^.player.position) poly
+    polygon poly
+    Cairo.setSourceRGBA 0.96 0.67 0.02 1.00
+    Cairo.fill
+    -- polygonDebug (thescene^.player.position) poly
 
   -- Render span lines
   forM (thescene^.obstacles) $ \poly -> do
@@ -82,7 +82,7 @@ scene thescene = do
   shadows thescene
 
   -- Render vertex markers
-  forM (thescene^.obstacles) cornerMarkers
+  -- forM (thescene^.obstacles) cornerMarkers
 
 
   -- Render player
@@ -93,8 +93,8 @@ scene thescene = do
 -- |
 cornerMarkers :: Polygon Double -> Cairo.Render ()
 cornerMarkers poly = do
-  Cairo.setSourceRGBA 0.84 0.06 0.18 1.00
-  Cairo.setFontSize 14
+  Cairo.setSourceRGBA 0.94 0.06 0.05 1.00
+  Cairo.setFontSize 16
   forM (zip [0..] poly) $ \(i, p) -> do
     vectorise Cairo.moveTo p
     Cairo.showText $ show i
@@ -103,7 +103,7 @@ cornerMarkers poly = do
 -- |
 shadows :: Scene -> Cairo.Render ()
 shadows thescene = do
-  forM (take 1 $ thescene^.obstacles) $ \poly -> do
+  forM (thescene^.obstacles) $ \poly -> do
     shadow (thescene^.player) poly
   return ()
 
@@ -113,7 +113,7 @@ shadow :: Character -> Polygon Double -> Cairo.Render ()
 shadow char poly = do
   let Just (fr, to) = Core.anglespan pos poly
       pos@(px:+py)  = char^.position
-      [α, β] = map (Core.normalise . snd . polar . subtract (px:+py) . snd) [fr, to]
+      [α, β] = map (snd . polar . subtract (px:+py) . snd) [fr, to]
 
   -- Cairo.resetClip
   -- Cairo.setFillRule Cairo.FillRuleEvenOdd
@@ -127,26 +127,28 @@ shadow char poly = do
 
   -- Another clip (overlapping) encompassing the polygon and the non-occluded portion of the ground
   -- polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
-  maybe (return ()) line (Core.distantEdge pos poly)
-  -- vectorise Cairo.lineTo $ pos + mkPolar 1200 β
+  -- maybe (return ()) line (Core.distantEdge pos poly)
+  vectorise Cairo.moveTo $ pos
+  -- vectorise Cairo.lineTo $ pos + mkPolar 400 α
+  arc 1200 (min α β) (max α β) pos
+  Cairo.closePath
   -- vectorise Cairo.lineTo $ pos + mkPolar 1200 α
-  Cairo.setSourceRGBA 0.91 0.02 0.40 1.00
-  Cairo.setLineWidth 8
-  Cairo.stroke
+  -- Cairo.setSourceRGBA 0.91 0.02 0.40 1.00
+  -- Cairo.setLineWidth 8
+  -- Cairo.stroke
   -- arc 1200 (min α β) (max α β) pos
-  Cairo.moveTo px py
-  arcDebug 1200 (min α β) (max α β) pos
-  Cairo.setSourceRGBA 0.31 0.31 0.31 0.47
-  Cairo.fill
+  -- arcDebug 1200 (min α β) (max α β) pos
+  -- Cairo.setSourceRGBA 0.31 0.31 0.31 0.47
+  -- Cairo.fill
   -- Cairo.clip
 
-  when False $ Cairo.withRadialPattern px py 1200 px py 0 $ \pattern -> do
-    Cairo.patternAddColorStopRGBA pattern 1.0 0.0 0.0 0.0 0.9
+  when True $ Cairo.withRadialPattern px py 40 px py 1200 $ \pattern -> do
     Cairo.patternAddColorStopRGBA pattern 0.0 1.0 1.0 1.0 0.9
+    Cairo.patternAddColorStopRGBA pattern 1.0 0.0 0.0 0.0 0.9
     Cairo.setSource pattern
     Cairo.fill
 
-  -- Cairo.resetClip
+  Cairo.resetClip
 
 
 -- |
@@ -192,9 +194,9 @@ polygon (p:oints) = vectorise Cairo.moveTo p >> mapM (vectorise Cairo.lineTo) oi
 -- |
 polygonDebug :: Complex Double -> Polygon Double -> Cairo.Render ()
 polygonDebug pos poly = do
-  Cairo.setSourceRGBA 0.84 0.06 0.18 1.00
-  Cairo.setFontSize 14
   polygon poly >> Cairo.setSourceRGBA 0.38 0.84 0.09 0.67 >> Cairo.fill
+  Cairo.setSourceRGBA 0.24 0.16 0.40 1.00
+  Cairo.setFontSize 14
   forM (zip [(0 :: Int)..] poly) $ \(i, p) -> do
     vectorise Cairo.moveTo p
     Cairo.showText $ (printf "%d (%.02f°)" i (todeg . Core.normalise $ Core.angle pos p :: Double) :: String)
