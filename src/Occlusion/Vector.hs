@@ -84,16 +84,14 @@ dotmap f (x:+y) = f x:+f y
 -- TODO: Visual debugging functions
 intersect :: RealFloat f => Line f -> Line f -> Maybe (Complex f)
 -- intersect f@(Line a b) g@(Line a' b')
-intersect f' g'
-  | slope f' == slope g' = Nothing -- TODO: Handle this case implicitly (eg. with linear) (?)
-  | otherwise = mp >>= \p -> indomain f' p >> indomain g' p
+intersect f' g' = mp >>= \p -> indomain f' p >> indomain g' p
   where
     indomain h' = restrict (h'^.linebegin) (h'^.linestop)
     mp = case [linear f', linear g'] of
-      [Just f, Nothing]  -> let x = g'^.linebegin.real in Just $ (x):+(plotpoint f x)
-      [Nothing, Just g]  -> let x = f'^.linebegin.real in Just $ (x):+(plotpoint g x)
-      [Just f,  Just g]  -> linearIntersect f g
-      [Nothing, Nothing] -> Nothing
+      [Just f, Nothing] -> let x = g'^.linebegin.real in Just $ (x):+(plotpoint f x)
+      [Nothing, Just g] -> let x = f'^.linebegin.real in Just $ (x):+(plotpoint g x)
+      [Just f,  Just g] -> linearIntersect f g
+      _                 -> Nothing
 
 
 -- | Gives the linear function overlapping the given segment
