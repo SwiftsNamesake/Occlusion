@@ -35,9 +35,11 @@ module Occlusion.Vector where
 -- We'll need these
 --------------------------------------------------------------------------------------------------------------------------------------------
 import Data.Complex
-import Data.Functor
+import Data.Functor ((<$>))
+import Data.List    (sort, sortBy)
 import Control.Applicative
 import Control.Lens
+import Control.Monad
 
 import Occlusion.Types
 import Occlusion.Lenses
@@ -82,15 +84,27 @@ dotmap f (x:+y) = f x:+f y
 -- TODO: Visual debugging functions
 intersect :: RealFloat f => Line f -> Line f -> Maybe (Complex f)
 -- intersect f@(Line a b) g@(Line a' b')
-intersect f g
-  | slope f == slope g = Nothing -- TODO: Handle this case explicitly (eg. with linear) (?)
-  -- | -- TODO: Deal with slope == Infinity
-  | otherwise = (,) <$> linear f <*> linear g >>= {- restric goes here -} uncurry linearIntersect -- TODO: Refactor (?)
+intersect f' g'
+  | slope f' == slope g' = Nothing -- TODO: Handle this case explicitly (eg. with linear) (?)
+  | otherwise = mp >>= \p -> indomain f' p >> indomain g' p
+  where
+    indomain h' = restrict (h'^.linebegin) (h'^.linestop)
+    mp = case [linear f', linear g'] of
+      [Just f, Nothing]  -> let x = g'^.linebegin.real in Just $ (x):+(plotpoint f x)
+      [Nothing, Just g]  -> let x = f'^.linebegin.real in Just $ (x):+(plotpoint g x)
+      [Just f,  Just g]  -> linearIntersect f g
+      [Nothing, Nothing] -> Nothing
 
 
 -- | Gives the linear function overlapping the given segment
 linear :: RealFloat f => Line f -> Maybe (Linear f)
 linear line = (,) <$> slope line <*> intercept line
+
+
+-- | Applies the given fu
+-- TODO: Rename (?)
+plotpoint :: RealFloat f => Linear f -> f -> f
+plotpoint (slope', intercept') x = slope'*x + intercept'
 
 
 -- | Finds the intersection (if any) of two linear functions

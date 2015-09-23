@@ -123,3 +123,12 @@ real f (re:+im) = (:+im) <$> f re
 
 imag :: Lens (Complex n) (Complex n) n n
 imag f (re:+im) = (re:+) <$> f im
+
+-- Lines -----------------------------------------------------------------------------------------------------------------------------------
+
+linebegin :: Lens (Line a) (Line a) (Complex a) (Complex a)
+linebegin f (Line fr to) = (`Line` to) <$> f fr
+
+
+linestop :: Lens (Line a) (Line a) (Complex a) (Complex a)
+linestop f (Line fr to) = (fr `Line`) <$> f to
