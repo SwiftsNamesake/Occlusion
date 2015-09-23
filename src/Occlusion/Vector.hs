@@ -85,7 +85,7 @@ dotmap f (x:+y) = f x:+f y
 intersect :: RealFloat f => Line f -> Line f -> Maybe (Complex f)
 -- intersect f@(Line a b) g@(Line a' b')
 intersect f' g'
-  | slope f' == slope g' = Nothing -- TODO: Handle this case explicitly (eg. with linear) (?)
+  | slope f' == slope g' = Nothing -- TODO: Handle this case implicitly (eg. with linear) (?)
   | otherwise = mp >>= \p -> indomain f' p >> indomain g' p
   where
     indomain h' = restrict (h'^.linebegin) (h'^.linestop)
@@ -101,7 +101,7 @@ linear :: RealFloat f => Line f -> Maybe (Linear f)
 linear line = (,) <$> slope line <*> intercept line
 
 
--- | Applies the given fu
+-- | Applies a linear function to the given value
 -- TODO: Rename (?)
 plotpoint :: RealFloat f => Linear f -> f -> f
 plotpoint (slope', intercept') x = slope'*x + intercept'
