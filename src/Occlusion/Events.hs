@@ -50,7 +50,8 @@ import qualified Graphics.Rendering.Cairo as Cairo
 import Occlusion.Types
 import Occlusion.Lenses
 import Occlusion.Vector
-import qualified Occlusion.Render as Render
+import qualified Occlusion.Behaviours as Behaviours
+import qualified Occlusion.Render     as Render
 
 
 
@@ -60,10 +61,14 @@ import qualified Occlusion.Render as Render
 -- |
 onrender :: AppState -> Cairo.Render ()
 onrender appstate = do
+  Render.background appstate
   Render.scene (appstate^.scene)
 
 
 -- |
+-- TODO: Simulation speed
+-- TODO: Factour out 'tick'
+-- TODO: Use state monad
 onanimate :: IORef AppState -> IO Bool
 onanimate stateref = do
   --
@@ -75,9 +80,7 @@ onanimate stateref = do
   modifyIORef stateref (animation.frame %~ (+1)) -- Increment frame count
 
   --
-  let dt = (1.0/appstate^.animation.fps):+0
-      v  = appstate^.scene.player.velocity
-  modifyIORef stateref (scene.player.position %~ (+(dt*v)))
+  modifyIORef stateref (Behaviours.run (scene.player))
   return True
 
 
@@ -85,9 +88,9 @@ onanimate stateref = do
 -- TODO: Move
 currentVelocity :: AppState -> Complex Double
 currentVelocity appstate
-  | appstate^.input.click == Nothing = 0:+0
-  | abs delta^.real < 12             = 0
-  | otherwise                        = mkPolar 64 (phase delta)
+  | appstate^.input.click == Nothing = 0.0:+0.0
+  | abs delta^.real < 12.0           = 0.0
+  | otherwise                        = mkPolar 64.0 (phase delta)
   where
     delta = appstate^.input.mouse - appstate^.scene.player.position
 

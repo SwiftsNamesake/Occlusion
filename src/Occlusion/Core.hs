@@ -41,6 +41,9 @@ import Data.Fixed
 import Data.List (minimumBy, maximumBy)
 import Data.Ord  (comparing)
 
+import Southpaw.Math.Constants
+import Southpaw.Utilities.Utilities (pairwise)
+
 import Occlusion.Types
 import Occlusion.Lenses
 import Occlusion.Vector
@@ -114,3 +117,19 @@ distantEdge p shape = case span' of
 -- TODO: Cyclic slice
 slice :: Int -> Int -> [a] -> [a]
 slice fr to = take (to-fr) . drop fr
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+-- |
+-- TODO: Cyclic
+-- TODO: Caching, performance, drop path segments as we walk past them
+-- TODO: Arbitrary paths (not just straight lines)
+walkalong :: RealFloat f => [Complex f] -> f -> Maybe (Complex f)
+walkalong path progress = case which of
+  []                -> Nothing    --
+  (((fr, to), l):_) -> Just $ fr + (to-fr) * (((progress-l)/distance fr to):+0)  --
+  where
+    lengths  = pairwise distance path --
+    segments = pairwise (,) path      --
+    which    = dropWhile ((<progress) . snd) $ zip segments (scanl (+) 0 lengths) --
+    distance a b = realPart . abs $ a - b

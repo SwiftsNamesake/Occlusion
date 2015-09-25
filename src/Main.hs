@@ -38,13 +38,19 @@ module Main where
 import Data.IORef
 import Data.Complex
 import qualified Data.Set as S
+import qualified Data.Map as M
 
 import Graphics.UI.Gtk
+import qualified Graphics.Rendering.Cairo as Cairo
+
+import Southpaw.Math.Constants
+import qualified Southpaw.Picasso.Palette as Palette
 
 import Occlusion.Types
 import Occlusion.Vector
-import qualified Occlusion.Window as Window
-import qualified Occlusion.Events as Events
+import qualified Occlusion.Window     as Window
+import qualified Occlusion.Events     as Events
+import qualified Occlusion.Behaviours as Behavours
 
 
 
@@ -55,15 +61,23 @@ import qualified Occlusion.Events as Events
 main :: IO ()
 main = do
   (window, canvas) <- Window.create size
+  assets'          <- loadAssets
   stateref         <- newIORef $ AppState { _animation = AnimationData { _fps=30.0, _frame=0 },
                                             _input     = InputData { _keyboard=S.empty, _mouse=0:+0, _click=Nothing },
-                                            _scene     = Scene { _player=Character { _position=0:+0, _velocity=0:+0 }, _obstacles=theobstacles },
-                                            _gui       = GUI { _window=window, _canvas=canvas } }
+                                            _scene     = Scene { _player=Character { _position=0:+0, _velocity=0:+0, _health=100, _name="Democritus", _colour=Palette.peru }, _obstacles=theobstacles },
+                                            _gui       = GUI { _window=window, _canvas=canvas },
+                                            _assets    = assets' }
   Events.attach window canvas stateref
   mainGUI
   where
     size = (720:+480) * 1.2
 
+
+-- |
+loadAssets :: IO Assets
+loadAssets = do
+  tree <- Cairo.imageSurfaceCreateFromPNG "assets/images/TreeAtDuskSmall.png"
+  return $ Assets { _images=M.fromList [("tree", tree)] }
 
 -- |
 theobstacles :: [Polygon Double]

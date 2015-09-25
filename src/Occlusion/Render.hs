@@ -10,7 +10,7 @@
 
 -- Created September 21 2015
 
--- TODO | -
+-- TODO | - Move generally useful functions to library (eg. Southpaw)
 --        -
 
 -- SPEC | -
@@ -42,7 +42,15 @@ import Control.Monad (forM, forM_, mapM, mapM_, when, unless, void)
 import Control.Lens
 import Text.Printf
 
+import qualified Data.Map as M
+
 import qualified Graphics.Rendering.Cairo as Cairo
+
+import           Southpaw.Math.Trigonometry
+import           Southpaw.Math.Constants
+import           Southpaw.Picasso.RenderUtils hiding (vectorise)
+import qualified Southpaw.Picasso.Render  as Render
+import qualified Southpaw.Picasso.Palette as Palette
 
 import Occlusion.Types
 import Occlusion.Lenses
@@ -101,6 +109,12 @@ cornerMarkers poly = do
     Cairo.showText $ show i
   return ()
 
+
+-- |
+background :: AppState -> Cairo.Render ()
+background appstate = perhaps pass (M.lookup "tree" (appstate^.assets.images)) $ \im -> Render.image (30:+30) im
+
+
 -- |
 shadows :: Scene -> Cairo.Render ()
 shadows thescene = do
@@ -128,7 +142,7 @@ shadow char poly = do
 
   -- Another clip (overlapping) encompassing the polygon and the non-occluded portion of the ground
   -- polygon $ [pos, snd $ fr] ++ (take (fst fr - fst to) . drop (fst to) $ cycle poly)
-  maybe pass line (Core.distantEdge pos poly)
+  maybe pass Render.linepath (Core.distantEdge pos poly)
   -- Cairo.liftIO $ print $ (uncurry ((,) `on` fst)) <$> Core.anglespan pos poly
   -- Cairo.setSourceRGBA 0.91 0.02 0.40 1.00
   -- Cairo.setLineWidth 8
@@ -204,33 +218,29 @@ polygonDebug pos poly = do
   forM (zip [(0 :: Int)..] poly) $ \(i, p) -> do
     vectorise Cairo.moveTo p
     Cairo.showText $ (printf "%d (%.02f°)" i (todeg . Core.normalise $ Core.angle pos p :: Double) :: String)
-  return ()
-  where
-    todeg rad = rad * (180.0/π)
-    torad deg = deg / (180.0/π)
-
-
--- |
-line :: Edge Double -> Cairo.Render ()
-line []      = return ()
-line (e:dge) = void $ vectorise Cairo.moveTo e >> forM dge (vectorise Cairo.lineTo)
+  pass
 
 
 -- |
 character :: Character -> Cairo.Render ()
 character char = do
-  Cairo.arc cx cy 12.0 0 (2*π)
-  Cairo.setSourceRGBA 0.47 0.04 0.37 1.00
+  vectorise Cairo.arc p 12.0 0 (2*π)
+  choose (char^.colour)
   Cairo.fill
 
-  line [char^.position, char^.position + (800:+0)]
+  Render.linepath [char^.position, char^.position + (800:+0)]
   Cairo.setSourceRGBA 1.00 0.00 0.00 1.00
   Cairo.setLineWidth  2.0
   Cairo.stroke
 
-  line [char^.position, char^.position + (0:+800)]
+  Render.linepath [char^.position, char^.position + (0:+800)]
   Cairo.setSourceRGBA 0.00 0.00 1.00 1.00
   Cairo.setLineWidth  2.0
   Cairo.stroke
+
+  choose Palette.mediumslateblue
+  Cairo.setFontSize 16
+  Render.anchoredText (p + (12:+(-12))) (0.0:+1.0) Cairo.showText (char^.name)
   where
-    cx:+cy = char^.position
+    p = char^.position
+    choose (r, g, b, a) = Cairo.setSourceRGBA r g b a

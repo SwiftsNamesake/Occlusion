@@ -1,5 +1,5 @@
 -- |
--- Module      : Occlusion.Window
+-- Module      : Occlusion.Behaviours
 -- Description :
 -- Copyright   : (c) Jonatan H Sundqvist, 2015
 -- License     : MIT
@@ -8,7 +8,7 @@
 -- Portability : POSIX (not sure)
 --
 
--- Created September 20 2015
+-- Created September 25 2015
 
 -- TODO | -
 --        -
@@ -21,13 +21,13 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- GHC Pragmas
 --------------------------------------------------------------------------------------------------------------------------------------------
-
+{-# LANGUAGE Rank2Types #-}
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------------------------------------------------------------------
-module Occlusion.Window where
+module Occlusion.Behaviours where
 
 
 
@@ -36,34 +36,30 @@ module Occlusion.Window where
 --------------------------------------------------------------------------------------------------------------------------------------------
 import Data.Complex
 
-import Graphics.UI.Gtk
-import qualified Graphics.Rendering.Cairo as Cairo
+import Control.Lens
 
-import Occlusion.Types
-import qualified Occlusion.Core   as Core
-import qualified Occlusion.Events as Events
+import Southpaw.Math.Constants
+import Southpaw.Math.Trigonometry
+
+import           Occlusion.Types
+import qualified Occlusion.Lenses as L
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- Functions
 --------------------------------------------------------------------------------------------------------------------------------------------
+
 -- |
-create :: Complex Double -> IO (Window, DrawingArea)
-create (winx:+winy) = do
-  initGUI
-  window <- windowNew
-  frame  <- frameNew
+player :: Behaviour Character AppState Character
+player self appstate = self & L.position %~ (+(dt*v))
+  where
+    dt = (1.0/appstate^.L.animation.L.fps):+0
+    v  = appstate^.L.scene.L.player.L.velocity
 
-  set window [windowTitle := "Occlusion"]
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-  canvas <- drawingAreaNew
-  containerAdd frame canvas
-  set window [ containerChild := frame ]
-  windowSetDefaultSize window (round winx) (round winy)
-  windowSetIconFromFile window "assets/images/TreeAtDusk.png"
-
-  widgetAddEvents canvas [PointerMotionMask, ButtonMotionMask, ButtonPressMask] -- MouseButton1Mask
-  widgetShowAll window
-
-  return (window, canvas)
+-- |
+-- TODO: Make polymorphic
+run :: Lens AppState AppState Character Character -> AppState -> AppState
+run char appstate = appstate & char .~ (appstate^.char.L.behaviour) (appstate^.char) appstate

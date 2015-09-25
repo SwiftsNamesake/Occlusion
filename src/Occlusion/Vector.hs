@@ -10,7 +10,7 @@
 
 -- Created Jonatan H Sundqvist 2015
 
--- TODO | -
+-- TODO | - Most of these functions should be moved to a utility library (eg. Southpaw)
 --        -
 
 -- SPEC | -
@@ -41,16 +41,10 @@ import Control.Applicative
 import Control.Lens
 import Control.Monad
 
+import Southpaw.Math.Constants
+
 import Occlusion.Types
 import Occlusion.Lenses
-
-
---------------------------------------------------------------------------------------------------------------------------------------------
--- Data
---------------------------------------------------------------------------------------------------------------------------------------------
--- |
-π :: RealFloat r => r
-π = pi
 
 
 

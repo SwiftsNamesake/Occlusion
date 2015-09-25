@@ -41,6 +41,9 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 
 import Graphics.UI.Gtk
+import qualified Graphics.Rendering.Cairo as Cairo
+
+import qualified Southpaw.Picasso.Palette as Palette
 
 import Occlusion.Types
 
@@ -65,6 +68,10 @@ input f s = (\new -> s { _input=new }) <$> f (_input s)
 
 scene :: Lens AppState AppState Scene Scene
 scene f s = (\new -> s { _scene=new }) <$> f (_scene s)
+
+assets :: Lens AppState AppState Assets Assets
+assets f s = (\new -> s { _assets=new }) <$> f (_assets s)
+
 
 -- GUI -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -106,6 +113,15 @@ player f s = (\new -> s { _player=new }) <$> f (_player s)
 obstacles :: Lens Scene Scene [Polygon Double] [Polygon Double]
 obstacles f s = (\new -> s { _obstacles=new }) <$> f (_obstacles s)
 
+
+-- Complex ---------------------------------------------------------------------------------------------------------------------------------
+
+
+images :: Lens Assets Assets (M.Map String Cairo.Surface) (M.Map String Cairo.Surface)
+images f s = (\new -> s { _images=new }) <$> f (_images s)
+
+
+
 -- Character -------------------------------------------------------------------------------------------------------------------------------
 
 position :: Lens Character Character (Complex Double) (Complex Double)
@@ -114,6 +130,19 @@ position f s = (\new -> s { _position=new }) <$> f (_position s)
 
 velocity :: Lens Character Character (Complex Double) (Complex Double)
 velocity f s = (\new -> s { _velocity=new }) <$> f (_velocity s)
+
+
+name :: Lens Character Character String String
+name f s = (\new -> s { _name=new }) <$> f (_name s)
+
+
+colour :: Lens Character Character (Palette.Colour Double) (Palette.Colour Double)
+colour f s = (\new -> s { _colour=new }) <$> f (_colour s)
+
+
+behaviour :: Lens Character Character (Behaviour Character AppState Character) (Behaviour Character AppState Character)
+behaviour f s = (\new -> s { _behaviour=new }) <$> f (_behaviour s)
+
 
 -- Complex ---------------------------------------------------------------------------------------------------------------------------------
 
