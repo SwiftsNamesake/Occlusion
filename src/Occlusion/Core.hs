@@ -129,13 +129,13 @@ slice fr to = take (to-fr) . drop fr
 walkalong :: RealFloat f => [Complex f] -> f -> Maybe (Complex f)
 walkalong []   _         = Nothing
 walkalong path progress' = case which of
-  []                 -> Nothing                     -- We've walked off the beaten path and now we're lost.
-  ((endpoints, l):_) -> Just $ walkline endpoints l --
+  []     -> Nothing                    -- We've walked off the beaten path and now we're lost.
+  (pl:_) -> Just $ uncurry walkline pl --
   where
-    progress = mod' progress' (sum lengths)
-    lengths  = pairwise distance path --
-    segments = pairwise (,) path      --
-    which    = dropWhile ((<progress) . snd) $ zip segments (scanl1 (+) lengths) --
-    distance = (realPart . abs) .: (-) --
-    walkline (fr, to) l = fr + (to-fr) * (((progress-l+distance fr to)/distance fr to):+0)  --
+    progress = mod' progress' (sum lengths) -- TODO: Remove this
+    lengths  = pairwise distance path       -- The length of each segment, in order
+    segments = pairwise (,) path            -- A list of consecutive endpoints
+    which    = dropWhile ((<progress) . snd) $ zip segments (scanl1 (+) lengths)           -- Drops segments that have already been passed
+    distance = (realPart . abs) .: (-)                                                     -- Distance (as a real number) between two points
+    walkline (fr, to) l = fr + (to-fr) * (((progress-l+distance fr to)/distance fr to):+0) --
     (.:) f g = (f .) . g

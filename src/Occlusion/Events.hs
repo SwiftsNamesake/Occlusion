@@ -83,10 +83,6 @@ onanimate stateref = do
   modifyIORef stateref $ Behaviours.run (scene.player)
   modifyIORef stateref $ Behaviours.run (scene.npcs.nth 0)
   return True
-  where
-    -- nth :: Functor f => Int -> (Character -> f Character) -> [Character] -> f [Character]
-    nth :: Int -> Lens [Character] [Character] Character Character
-    nth i f s = let assemble new = take i s ++ [new] ++ drop (i+1) s in assemble <$> f (s !! i)
 
 
 -- |
