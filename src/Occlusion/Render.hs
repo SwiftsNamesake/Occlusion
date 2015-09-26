@@ -93,6 +93,14 @@ scene thescene = do
   -- Render vertex markers
   -- forM (thescene^.obstacles) cornerMarkers
 
+  -- NPCs
+  forM (thescene^.npcs) $ \n -> do
+    vectorise Cairo.arc (n^.position) 12.0 0 (2*π)
+    choose (n^.colour)
+    Cairo.fill
+
+  --
+  forM (map (+(200:+150)) [20:+20, 300:+32, 200:+10, 20:+20]) $ \p -> vectorise Cairo.arc p 8 0 (2*π) >> Cairo.setSourceRGBA 0.2 0.4 0.6 1.0 >> Cairo.fill
 
   -- Render player
   character (thescene^.player)

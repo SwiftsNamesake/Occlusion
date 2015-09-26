@@ -21,7 +21,7 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- GHC Pragmas
 --------------------------------------------------------------------------------------------------------------------------------------------
-
+{-# LANGUAGE Rank2Types #-}
 
 
 
@@ -72,27 +72,21 @@ onrender appstate = do
 onanimate :: IORef AppState -> IO Bool
 onanimate stateref = do
   --
-  modifyIORef stateref (\appstate -> appstate & scene.player.velocity .~ currentVelocity appstate) -- TODO: This is ugly
   appstate <- readIORef stateref
 
   --
   widgetQueueDraw (appstate^.gui.canvas)
   modifyIORef stateref (animation.frame %~ (+1)) -- Increment frame count
 
-  --
-  modifyIORef stateref (Behaviours.run (scene.player))
+  -- TODO: Refactor (cf. State, traverse, each)
+  -- modifyIORef stateref $ \appstate -> forM [scene.player, scene.npcs.ix 0] $ \char -> Behaviours.run char
+  modifyIORef stateref $ Behaviours.run (scene.player)
+  modifyIORef stateref $ Behaviours.run (scene.npcs.nth 0)
   return True
-
-
--- |
--- TODO: Move
-currentVelocity :: AppState -> Complex Double
-currentVelocity appstate
-  | appstate^.input.click == Nothing = 0.0:+0.0
-  | abs delta^.real < 12.0           = 0.0
-  | otherwise                        = mkPolar 64.0 (phase delta)
   where
-    delta = appstate^.input.mouse - appstate^.scene.player.position
+    -- nth :: Functor f => Int -> (Character -> f Character) -> [Character] -> f [Character]
+    nth :: Int -> Lens [Character] [Character] Character Character
+    nth i f s = let assemble new = take i s ++ [new] ++ drop (i+1) s in assemble <$> f (s !! i)
 
 
 -- |

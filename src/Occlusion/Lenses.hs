@@ -24,6 +24,7 @@
 
 
 
+
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,6 +110,8 @@ frame f s = (\new -> s { _frame=new }) <$> f (_frame s)
 player :: Lens Scene Scene Character Character
 player f s = (\new -> s { _player=new }) <$> f (_player s)
 
+npcs :: Lens Scene Scene [Character] [Character]
+npcs f s = (\new -> s { _npcs=new }) <$> f (_npcs s)
 
 obstacles :: Lens Scene Scene [Polygon Double] [Polygon Double]
 obstacles f s = (\new -> s { _obstacles=new }) <$> f (_obstacles s)

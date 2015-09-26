@@ -82,7 +82,7 @@ data Line n    = Line (Complex n) (Complex n)
 
 
 -- |
-data Scene = Scene { _player :: Character, _obstacles :: [Polygon Double] }
+data Scene = Scene { _player :: Character, _npcs :: [Character], _obstacles :: [Polygon Double] }
 
 
 -- |

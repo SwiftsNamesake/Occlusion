@@ -121,15 +121,21 @@ slice fr to = take (to-fr) . drop fr
 --------------------------------------------------------------------------------------------------------------------------------------------
 
 -- |
--- TODO: Cyclic
+-- TODO: Cyclic (?)
 -- TODO: Caching, performance, drop path segments as we walk past them
 -- TODO: Arbitrary paths (not just straight lines)
+-- TODO: Refactor, simplify
+-- TODO: Invariants, tests, QuickCheck
 walkalong :: RealFloat f => [Complex f] -> f -> Maybe (Complex f)
-walkalong path progress = case which of
-  []                -> Nothing    --
-  (((fr, to), l):_) -> Just $ fr + (to-fr) * (((progress-l)/distance fr to):+0)  --
+walkalong []   _         = Nothing
+walkalong path progress' = case which of
+  []                 -> Nothing                     -- We've walked off the beaten path and now we're lost.
+  ((endpoints, l):_) -> Just $ walkline endpoints l --
   where
+    progress = mod' progress' (sum lengths)
     lengths  = pairwise distance path --
     segments = pairwise (,) path      --
-    which    = dropWhile ((<progress) . snd) $ zip segments (scanl (+) 0 lengths) --
-    distance a b = realPart . abs $ a - b
+    which    = dropWhile ((<progress) . snd) $ zip segments (scanl1 (+) lengths) --
+    distance = (realPart . abs) .: (-) --
+    walkline (fr, to) l = fr + (to-fr) * (((progress-l+distance fr to)/distance fr to):+0)  --
+    (.:) f g = (f .) . g
