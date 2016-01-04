@@ -120,7 +120,7 @@ cornerMarkers poly = do
 
 -- |
 background :: AppState -> Cairo.Render ()
-background appstate = perhaps pass (M.lookup "tree" (appstate^.assets.images)) $ \im -> Render.image (30:+30) im
+background appstate = perhaps pass (M.lookup "tree" (appstate^.assets.images)) $ \im -> Render.image (600:+5) im
 
 
 -- |

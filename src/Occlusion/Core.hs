@@ -89,7 +89,7 @@ normalise = flip mod' $ 2*π
 -- |
 -- TODO: Rename (eg. occlusionEdge, frontEdge, near/far, cover, etc.) (?)
 nearestEdge :: RealFloat f => Complex f -> Polygon f -> Edge f
-nearestEdge p poly = error ""
+nearestEdge p poly = error "Function 'nearestEdge' is currently on holiday"
 
 
 -- |
@@ -135,7 +135,7 @@ walkalong path progress' = case which of
     progress = mod' progress' (sum lengths) -- TODO: Remove this
     lengths  = pairwise distance path       -- The length of each segment, in order
     segments = pairwise (,) path            -- A list of consecutive endpoints
-    which    = dropWhile ((<progress) . snd) $ zip segments (scanl1 (+) lengths)           -- Drops segments that have already been passed
+    which    = dropWhile ((<progress) . snd) $ zip segments (scanl1 (+) lengths)           -- Drops segments that have already been passed (leaving us with the line we're on as the first value)
     distance = (realPart . abs) .: (-)                                                     -- Distance (as a real number) between two points
     walkline (fr, to) l = fr + (to-fr) * (((progress-l+distance fr to)/distance fr to):+0) --
     (.:) f g = (f .) . g

@@ -64,7 +64,7 @@ main = do
   assets'          <- loadAssets
   stateref         <- newIORef $ AppState { _animation = AnimationData { _fps=30.0, _frame=0 },
                                             _input     = InputData { _keyboard=S.empty, _mouse=0:+0, _click=Nothing },
-                                            _scene     = Scene { _player=Character { _position=0:+0, _velocity=0:+0, _health=100, _name="Democritus", _colour=Palette.peru, _behaviour=Behaviours.player },
+                                            _scene     = Scene { _player=Character { _position=0:+0, _velocity=0:+0, _health=100, _name="Democritus", _colour=Palette.peru,  _behaviour=Behaviours.player },
                                                                  _npcs=[Character { _position=0:+0, _velocity=20:+20, _health=58, _name="Agamemnon", _colour=Palette.orchid, _behaviour=Behaviours.npc patrol }],
                                                                  _obstacles=theobstacles },
                                             _gui       = GUI { _window=window, _canvas=canvas },

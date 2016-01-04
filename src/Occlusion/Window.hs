@@ -61,7 +61,7 @@ create (winx:+winy) = do
   containerAdd frame canvas
   set window [ containerChild := frame ]
   windowSetDefaultSize window (round winx) (round winy)
-  windowSetIconFromFile window "assets/images/TreeAtDusk.png"
+  windowSetIconFromFile window "C:/Users/Jonatan/Desktop/Haskell/projects/Occlusion/assets/images/TreeAtDusk.png"
 
   widgetAddEvents canvas [PointerMotionMask, ButtonMotionMask, ButtonPressMask] -- MouseButton1Mask
   widgetShowAll window

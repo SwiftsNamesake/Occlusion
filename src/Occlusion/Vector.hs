@@ -10,7 +10,7 @@
 
 -- Created Jonatan H Sundqvist 2015
 
--- TODO | - Most of these functions should be moved to a utility library (eg. Southpaw)
+-- TODO | - Most of these functions should be moved to a utility library (eg. Cartesian)
 --        -
 
 -- SPEC | -
